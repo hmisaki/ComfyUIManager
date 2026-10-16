@@ -1,0 +1,4 @@
+# ComfyUIManager 运行依赖
+# 版本号是本机实测可用的版本；更新的小版本通常也可用。
+PySide6==6.10.1
+PySide6-Fluent-Widgets==1.9.2
