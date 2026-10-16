@@ -2,6 +2,31 @@
 
 本文件记录 ComfyUIManager 的重要变更。开源整理之前的历史修复按「当时踩到的坑」保留，便于回溯。
 
+## [0.2.0] - 2026-10-16 —— MCP 服务
+
+### 新增
+
+- **`mcp_server.py`：stdio MCP 服务（零第三方依赖）**，把管理器暴露成 14 个 `cman_*` 工具：
+  `status` / `get_config` / `set_config` / `list_templates` / `list_instances` /
+  `create_instance` / `launch_instance` / `delete_instance` / `check_instance` /
+  `list_workflows` / `add_workflow` / `discover_workflows` / `list_models` / `list_nodes`。
+  - 协议面：`initialize`（含 `instructions`）/ `tools/list` / `tools/call` / `ping`，
+    以及 `resources/list`、`prompts/list` 的空应答；日志走 stderr，stdout 只出 JSON-RPC。
+  - `--selftest` 与 `--list` 两个自检入口。
+- **`core/ops.py`：无界面操作层**。GUI 与 MCP 共用同一套语义：模板校验（模板名 = conda 环境名）、
+  实例创建（复制模板 → `conda create --clone` → 模型 junction → 相对路径登记）、启动/删除、
+  工作流登记与扫描、模型/节点知识库过滤、`/system_stats` 探测。失败时清理复制了一半的目录。
+- **删除类操作有 `confirm` 硬门槛**：`cman_delete_instance` 不传 `confirm=true` 直接拒绝（只回一句人话）。
+- `docs/MCP.md`（工具表、客户端配置、超时与安全边界）、`mcp.example.json`、
+  `tools/mcp_smoke_test.py`（真的 spawn 一次服务走 stdio 对话，含删除护栏与中文往返校验）。
+- `core/config.py` 增 `clear_cache()`：常驻进程里新建/删除 conda 环境后清探测缓存。
+
+### 变更
+
+- `core/signals.py` 的 `request_launch_workflow` 修正为双参数（原声明与 `02_workflows.py` 的 emit 不一致）。
+  GUI 侧的接线仍未实现，但 MCP 路径已经能真正启动实例。
+- `README.md` 增「MCP 服务」一节与目录结构更新。
+
 ## [0.1.0] - 2026-10-16 —— 首次开源
 
 ### 新增

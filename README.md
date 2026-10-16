@@ -47,6 +47,23 @@ ComfyUIManager 把这几件事收敛到界面上：选模板 → 填个英文 ID
 
 自定义背景图、切换工作区（改完重启程序生效）。
 
+### 6. MCP 服务（`mcp_server.py`）
+
+把管理器暴露成 MCP 工具，让 agent 自己干这些事：看现状 → 挑模板 → 建实例 →
+起 ComfyUI → 登记工作流 → 查模型/节点库。零第三方依赖（标准库实现的 stdio MCP），
+不监听端口，删除类操作有 `confirm` 硬门槛。
+
+```bash
+python mcp_server.py --selftest   # 自检
+python mcp_server.py --list       # 看工具清单
+python mcp_server.py             # 由 MCP 客户端 spawn
+```
+
+14 个工具（`cman_` 前缀）：`status` / `get_config` / `set_config` / `list_templates` /
+`list_instances` / `create_instance` / `launch_instance` / `delete_instance` /
+`check_instance` / `list_workflows` / `add_workflow` / `discover_workflows` /
+`list_models` / `list_nodes`。配置写法与工具细节见 [`docs/MCP.md`](docs/MCP.md)。
+
 ---
 
 ## 环境要求
@@ -135,9 +152,17 @@ ComfyUIManager/
 ├── startManager.bat               # 启动脚本
 ├── launcher_config.json           # 程序级配置（本机生成，不入库）
 ├── launcher_config.example.json   # 配置模板
+├── mcp_server.py                  # MCP 服务（stdio，标准库实现）
+├── mcp.example.json               # MCP 客户端配置示例
 ├── core/
 │   ├── config.py                  # 路径 / conda / Git Bash 解析（纯 stdlib）
+│   ├── ops.py                     # 无界面操作层：GUI 与 MCP 共用的语义
 │   └── signals.py                 # 跨模块信号总线
+├── docs/
+│   ├── ARCHITECTURE.md            # 架构与数据流
+│   ├── CONFIGURATION.md           # 配置项与命令原文
+│   └── MCP.md                     # MCP 工具表与客户端配置
+├── tools/mcp_smoke_test.py        # 冒烟测试：真的 spawn 一次 MCP 服务
 ├── managerModules/                # 业务模块，按文件名排序加载
 │   ├── 01_ComfyUIEnvs.py          # 启动管理
 │   ├── 02_workflows.py            # 工作流管理

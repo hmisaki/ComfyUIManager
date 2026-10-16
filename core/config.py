@@ -243,6 +243,15 @@ def conda_exec(cfg: Optional[Dict[str, Any]], args: List[str],
     return subprocess.run(cmd, capture_output=True, timeout=timeout)
 
 
+def clear_cache() -> None:
+    """清空探测缓存。
+
+    新建 / 删除 conda 环境之后必须调用，否则 ``list_conda_envs`` 还会给出旧列表
+    （常驻进程里这个缓存不失效，命令行一次性脚本感觉不到）。
+    """
+    _CACHE.clear()
+
+
 def list_conda_envs(cfg: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
     """返回 ``{环境名: 前缀目录}``；探测失败返回空字典。"""
     cfg = cfg or load_config()
